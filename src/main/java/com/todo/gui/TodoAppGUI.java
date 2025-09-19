@@ -146,6 +146,11 @@ public class TodoAppGUI extends JFrame{
         String description = descriptionArea.getText().trim();
         boolean completed = completCheckBox.isSelected();
 
+        if (title.isEmpty()){
+            JOptionPane.showMessageDialog(this, "Title cannot be empty.", "Input Error", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
         try{
             Todo todo = new Todo(title,description);
             todo.setCompleted(completed);
@@ -177,7 +182,35 @@ public class TodoAppGUI extends JFrame{
     }
 
     private void updateTodos(){
-        
+        tableModel.getRowCount();
+        int selectedRow = todoTable.getSelectedRow();
+        if(selectedRow < 0){
+            JOptionPane.showMessageDialog(this, "Please select a todo to update.", "Selection Error", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        String title = titleField.getText().trim();
+        if(title.isEmpty()){
+            JOptionPane.showMessageDialog(this, "Title cannot be empty.", "Input Error", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        int id = (int)todoTable.getValueAt(selectedRow, 0);
+        try{
+            Todo todo = todoDAO.getTodoById(id);
+            if(todo != null){
+                todo.setTitle(title);
+                todo.setDescription(descriptionArea.getText().trim());
+                todo.setCompleted(completCheckBox.isSelected());
+                todoDAO.updatetodo(todo);
+                JOptionPane.showMessageDialog(this, "Todo updated successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
+                loadTodos();
+            }
+            else{
+                JOptionPane.showMessageDialog(this, "Failed to update Todo", "Update Error", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+        catch(SQLException e){
+            JOptionPane.showMessageDialog(this, "Error updating todo: " + e.getMessage(), "Database Error", JOptionPane.ERROR_MESSAGE);
+        }
     }
     private void deleteTodos(){}
     private void refreshTodos(){}
@@ -203,6 +236,7 @@ public class TodoAppGUI extends JFrame{
                 todo.getUpdated_at()
             };
             tableModel.addRow(row);
+
         }
     }
 

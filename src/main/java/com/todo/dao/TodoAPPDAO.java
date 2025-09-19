@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.sql.ResultSet;
 
@@ -15,6 +16,8 @@ public class TodoAPPDAO {
 
     private static final String SELECT_ALL_TODOS = "SELECT * FROM todos ORDER BY created_at DESC";
     private static final String INSERT_TODO = "INSERT INTO todos (title, description, completed, created_at, updated_at) VALUES (?, ?, ?, ?, ?)";
+    private static final String SELECT_TODO_BY_ID = "SELECT * FROM todos WHERE id = ?";
+    private static final String UPDATE_TODO = "UPDATE todos SET title = ?, description = ?, completed = ?, updated_at = ? WHERE id = ?";
 
     public int createtodo(Todo todo) throws SQLException {
         try(Connection conn = DatabaseConnection.getDBConnection();
@@ -36,6 +39,33 @@ public class TodoAPPDAO {
                     throw new SQLException("Creating todo failed, no ID obtained.");
                 }
             }
+        }
+    }
+
+    public Todo getTodoById(int id) throws SQLException {
+        try (Connection conn = DatabaseConnection.getDBConnection();
+             PreparedStatement stmt = conn.prepareStatement(SELECT_TODO_BY_ID);) {
+            stmt.setInt(1, id);
+            try (ResultSet res = stmt.executeQuery();) {
+                if (res.next()) {
+                    return getTodoRow(res);
+                }
+            }
+        }
+        return null;
+    }
+
+    public boolean updatetodo(Todo todo) throws SQLException {
+        try(Connection conn = DatabaseConnection.getDBConnection();
+            PreparedStatement stmt = conn.prepareStatement(UPDATE_TODO);
+        ){
+            stmt.setString(1, todo.getTitle());
+            stmt.setString(2, todo.getDescription());
+            stmt.setBoolean(3, todo.isCompleted());
+            stmt.setTimestamp(4, Timestamp.valueOf(LocalDateTime.now()));
+            stmt.setInt(5, todo.getId());
+            int affectedRows = stmt.executeUpdate();
+            return affectedRows > 0;
         }
     }
 
