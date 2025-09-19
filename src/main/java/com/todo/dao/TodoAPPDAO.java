@@ -18,6 +18,7 @@ public class TodoAPPDAO {
     private static final String INSERT_TODO = "INSERT INTO todos (title, description, completed, created_at, updated_at) VALUES (?, ?, ?, ?, ?)";
     private static final String SELECT_TODO_BY_ID = "SELECT * FROM todos WHERE id = ?";
     private static final String UPDATE_TODO = "UPDATE todos SET title = ?, description = ?, completed = ?, updated_at = ? WHERE id = ?";
+    private static final String DELETE_TODO = "DELETE FROM todos WHERE id = ?";
 
     public int createtodo(Todo todo) throws SQLException {
         try(Connection conn = DatabaseConnection.getDBConnection();
@@ -78,6 +79,15 @@ public class TodoAPPDAO {
         java.time.LocalDateTime updated_at = r.getTimestamp("updated_at").toLocalDateTime();
         Todo todo = new Todo(id, title, description, completed, created_at, updated_at);
         return todo;
+    }
+
+    public boolean deleteTodo(int id) throws SQLException {
+        try(Connection conn = DatabaseConnection.getDBConnection();
+            PreparedStatement stmt = conn.prepareStatement(DELETE_TODO);){
+            stmt.setInt(1, id);
+            int affectedRows = stmt.executeUpdate();
+            return affectedRows > 0;
+            }
     }
 
     public List<Todo> getAllTodos() throws SQLException {
