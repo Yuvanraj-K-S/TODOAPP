@@ -19,6 +19,8 @@ public class TodoAPPDAO {
     private static final String SELECT_TODO_BY_ID = "SELECT * FROM todos WHERE id = ?";
     private static final String UPDATE_TODO = "UPDATE todos SET title = ?, description = ?, completed = ?, updated_at = ? WHERE id = ?";
     private static final String DELETE_TODO = "DELETE FROM todos WHERE id = ?";
+    private static final String SELECT_COMPLETED_TODOS = "SELECT * FROM todos WHERE completed = true ORDER BY created_at DESC";
+    private static final String SELECT_NOT_COMPLETED_TODOS = "SELECT * FROM todos WHERE completed = false ORDER BY created_at DESC";
 
     public int createtodo(Todo todo) throws SQLException {
         try(Connection conn = DatabaseConnection.getDBConnection();
@@ -87,6 +89,32 @@ public class TodoAPPDAO {
             stmt.setInt(1, id);
             int affectedRows = stmt.executeUpdate();
             return affectedRows > 0;
+            }
+    }
+
+    public List<Todo> getCompletedTodos() throws SQLException{
+        try(Connection conn = DatabaseConnection.getDBConnection();
+            PreparedStatement stmt = conn.prepareStatement(SELECT_COMPLETED_TODOS);){
+                List<Todo> todos = new ArrayList<>();
+                try(ResultSet res = stmt.executeQuery();){
+                    while(res.next()){
+                        todos.add(getTodoRow(res));
+                    }
+                    return todos;
+                }
+            }
+    }
+
+    public List<Todo> getNotCompletedTodos() throws SQLException{
+        try(Connection conn = DatabaseConnection.getDBConnection();
+            PreparedStatement stmt = conn.prepareStatement(SELECT_NOT_COMPLETED_TODOS);){
+                List<Todo> todos = new ArrayList<>();
+                try(ResultSet res = stmt.executeQuery();){
+                    while(res.next()){
+                        todos.add(getTodoRow(res));
+                    }
+                    return todos;
+                }
             }
     }
 
